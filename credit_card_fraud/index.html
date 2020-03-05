@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-route.js"></script>
+<script src="https://cdn.rawgit.com/naptha/tesseract.js/1.0.10/dist/tesseract.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.0.min.js"></script>
+
+<body ng-app="myApp" ng-controller="userCtrl">
+  Id :<input class="container__input" type="text" ng-model="Id" required>
+  <select ng-model="type" required>
+    <option>Logistic</option>
+    <option>Random</option>
+  </select>
+  <button ng-click="getid(Id,type)">Submit</button>
+  PDate :<input class="container__input" type="text" ng-model="PDate" required>
+  <select ng-model="type1" required>
+    <option>Logistic</option>
+    <option>Random</option>
+  </select>
+  <button ng-click="getdate(PDate,type)">Submit</button><br>
+  <br>
+  <br>
+  <p>{{error}}</p>
+
+  <table border="1" ng-show="hide" cellpadding=10>
+    <tr>
+      <th>Id</th>
+      <th>prediction</th>
+    </tr>
+    <tr ng-repeat="x in obj">
+      <td>{{x.id}}</td>
+      <td ng-If="x.prediction === 0" style="color: green;">Not Fraud</td>
+      <td ng-If="x.prediction === 1" style="color: red;">Fraud</td>
+    </tr>
+  </table>
+  <script>
+    var app = angular.module('myApp', []);
+    app.controller("userCtrl", function ($scope, $http) {
+      $scope.Id = null;
+      $scope.PDate = null;
+      $scope.type = null;
+      $scope.type1 = null;
+      $scope.hide = false;
+      $scope.getid = function () {
+
+        var parameters = {
+          Id: $scope.Id,
+          Ml: $scope.type,
+          flag: "flagId"
+        };
+        var config = {
+          params: parameters
+        };
+        $scope.hello = config;
+        $http.get("http://localhost:3000/api/date", config).then(
+          function (response) {
+            $scope.msg = response.data;
+            if ($scope.msg.length != 0) {
+              $scope.myObject = eval('(' + $scope.msg + ')');
+              $scope.hide = true;
+              $scope.obj = angular.fromJson($scope.myObject);
+              console.log("$$$$$$$$$$$$$$$$$", $scope.obj[0].prediction);
+            }
+            else {
+              $scope.hide = false;
+              $scope.error = "Id invalid"
+            }
+          },
+          function (response) {
+            $scope.msg = response.data;
+            $scope.statusval = response.status;
+            $scope.statustext = response.statusText;
+            $scope.headers = response.headers();
+          }
+        );
+      };
+      $scope.getdate = function () {
+        var parameters = {
+          PDate: $scope.PDate,
+          Ml: $scope.type1,
+          flag: 'flagDate'
+        };
+        var config = {
+          params: parameters
+        };
+        $scope.hello = config;
+        $http.get("http://localhost:3000/api/date", config).then(
+          function (response) {
+            $scope.msg = response.data;
+            if ($scope.msg.length != 0) {
+              $scope.myObject = eval('(' + $scope.msg + ')');
+              console.log("$$$$$$$$$$$$$$$$$", $scope.msg);
+              $scope.hide = true;
+              $scope.obj = angular.fromJson($scope.myObject);
+            }
+            else {
+              $scope.hide = false;
+              $scope.error = "Id invalid"
+            }
+          },
+          function (response) {
+            $scope.msg = response.data;
+            $scope.statusval = response.status;
+            $scope.statustext = response.statusText;
+            $scope.headers = response.headers();
+          }
+        );
+      };
+    });
+  </script>
+</body>
+
+</html>
